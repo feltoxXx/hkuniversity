@@ -19,6 +19,30 @@ def get_contract_table(contract, table, query, offset):
 
     return result
 
+
+@app.route('/proyecto1')
+def proyecto1():
+    balances =  get_contract_table("tokens", "balances", {"symbol":"BUDSX"}, 0)
+    
+    balance =  get_contract_table("tokens", "balances", {"account": "hk-staking"}, 0)
+    
+    budsxSupply =  get_contract_table("tokens", "tokens", {"symbol":"BUDSX"}, 0)
+    
+    poolPrice =  get_contract_table("marketpools", "pools", {"tokenPair": "BUDS:SWAP.HIVE"}, 0)
+
+
+    for item in balances:
+        item["balance"] = float(item["balance"])
+
+    balances.sort(key=lambda x: x["balance"], reverse=True)
+
+    if balances[0]["account"] == "null":
+        balances.pop(0)
+    
+
+    return jsonify({"balanceStaking":balance, "budsxSupply":budsxSupply, "poolPrice":poolPrice, "holders":balances})
+
+
 @app.route('/balances/<string:symbol>', methods=['GET'])
 def read_tokens(symbol):
 
