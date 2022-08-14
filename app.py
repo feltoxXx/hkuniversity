@@ -38,5 +38,5 @@ def read_tokens(symbol):
 
 @app.route('/')
 def hello_world():
-    return 'Hello from Flask!'
+    return 'Hello from new Flask!'
 
