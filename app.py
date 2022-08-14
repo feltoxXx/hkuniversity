@@ -1,6 +1,6 @@
 # A very simple Flask Hello World app for you to get started with...
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import requests
 
 app = Flask(__name__)
@@ -18,6 +18,25 @@ def get_contract_table(contract, table, query, offset):
             result += get_contract_table(contract, table, query, offset+1000)
 
     return result
+
+def get_history(account, symbol, limit, offset):
+        """"Get the transaction history for an account and a token"""
+        url = "https://accounts.hive-engine.com/accountHistory?account=%s&limit=%s&offset=%s&symbol=%s" % (account, limit, offset, symbol)
+        response = []
+        with requests.get(url) as r:
+            result = r.json()
+            # result = data['result']
+            for item in result:
+                response.append(item)
+                if item["to"] == "null":
+                    break
+                
+             
+            if len(response) == 500:
+                result += get_history(account, symbol, limit, offset+500)
+           
+
+        return response
 
 
 @app.route('/proyecto1')
@@ -43,6 +62,39 @@ def proyecto1():
     return jsonify({"balanceStaking":balance, "budsxSupply":budsxSupply, "poolPrice":poolPrice, "holders":balances})
 
 
+@app.route('/proyecto2')
+def proyecto2():
+
+    # @hk-vault   (`paquetes de avatares)
+    # @hk-nvault (porros)
+    # @hk-forge  (forja)
+    # @hk-dev     (shared market fee)
+    # @hashkings  (torres de agua)
+    # @hk-bang   (paquetes bang!)
+    balancevault = []
+    balancenvault = []
+    balanceforge = []
+    balancedev = []
+    balancehashkings = []
+    balancebang = []
+    balances = {}
+    accounts= {
+        "hk-vault":balancevault,
+        "hk-nvault":balancenvault,
+        "hk-forge":balanceforge,
+        "hk-dev":balancedev,
+        "hashkings":balancehashkings,
+        "hk-bang":balancebang
+    }
+
+    for k, v in accounts.items():
+        accounts[k] = get_history(k, "BUDS", 500, 0)
+
+
+    return jsonify(accounts)
+
+
+
 @app.route('/balances/<string:symbol>', methods=['GET'])
 def read_tokens(symbol):
 
@@ -56,11 +108,12 @@ def read_tokens(symbol):
 
     if balances[0]["account"] == "null":
             balances.pop(0)
+            
 
     return jsonify(balances)
 
 
 @app.route('/')
 def hello_world():
-    return 'Hello from new Flask!'
+    return render_template('index.html')
 
