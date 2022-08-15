@@ -25,7 +25,6 @@ def get_history(account, symbol, limit, offset):
         response = []
         with requests.get(url) as r:
             result = r.json()
-            # result = data['result']
             for item in result:
                 response.append(item)
                 if item["to"] == "null":
@@ -77,7 +76,6 @@ def proyecto2():
     balancedev = []
     balancehashkings = []
     balancebang = []
-    balances = {}
     accounts= {
         "hk-vault":balancevault,
         "hk-nvault":balancenvault,
@@ -92,6 +90,20 @@ def proyecto2():
 
 
     return jsonify(accounts)
+
+
+@app.route('/proyecto3')
+def proyecto3():
+    landplots =  get_contract_table("nft", "HKFARMinstances", {"properties.TYPE": "plot"}, 0)
+
+    return jsonify(landplots)
+
+
+@app.route('/proyecto4')
+def proyecto4():
+    avatares =  get_contract_table("nft", "HKFARMinstances", {"properties.TYPE": "avatar"}, 0)
+
+    return jsonify(avatares)
 
 
 
