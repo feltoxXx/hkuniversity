@@ -37,6 +37,17 @@ def get_history(account, symbol, limit, offset):
 
         return response
 
+def account_history(account, symbol, limit, offset):
+        """"Get the transaction history for an account and a token"""
+        url = "https://accounts.hive-engine.com/accountHistory?account=%s&limit=%s&offset=%s&symbol=%s" % (account, limit, offset, symbol)
+        with requests.get(url) as r:
+            result = r.json()                
+             
+            if len(result) == 500:
+                result += account_history(account, symbol, limit, offset+500)
+           
+        return result
+
 
 @app.route('/proyecto1')
 def proyecto1():
@@ -104,6 +115,26 @@ def proyecto4():
     avatares =  get_contract_table("nft", "HKFARMinstances", {"properties.TYPE": "avatar"}, 0)
 
     return jsonify(avatares)
+
+
+@app.route('/proyecto5')
+def proyecto5():
+
+    torres =  get_contract_table("nft", "HKFARMinstances", {"properties.TYPE": "water"}, 0)
+
+    txsSWAPHIVE = []
+    txsBUDS = []
+    txsHIVE = []
+    txs= {
+        "SWAP.HIVE":txsSWAPHIVE,
+        "BUDS":txsBUDS,
+        "HIVE":txsHIVE,
+    }
+
+    for k, v in txs.items():
+        txs[k] = account_history("hashkings", k, 500, 0)
+
+    return jsonify({"hashkings":txs, "holders":torres})
 
 
 
