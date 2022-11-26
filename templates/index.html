@@ -35,9 +35,67 @@
         </div>
     
         <div class="col">
-            {{ found }}
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-md-6 m-auto">
+                        <h3 class="text-center mb3 autocomplete">Hive Username</h3>
+                        <div class="form-group">
+                            <input type="text" id="acc-name"
+                                class="form-control form-control-lg"
+                                placeholder="Hive Account Name"
+                                list="nameList"
+                            />
+                            <div id="nameList">
+                            </div>
+                        <!-- <div id="match-list"></div>
+                        </div> -->
+                    </div>
+                    <!-- card -->
+                  </div>
+                  <!-- col -->
+                </div>
+                <!-- row -->
+            </div>
+            <!-- container -->
         </div>
     
     </div>
+
+
+
+    <button class="btn btn-primary" id="Check Keychain" name="check-keychain" onClick="hiveKeychainSign()">Hive KeyChain Login</button>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+function hiveKeychainSign(){
+    let name = document.querySelector("#acc-name").value;
+    const keychain = window.hive_keychain;
+    console.log(keychain);
+    if (!name) {
+        // need a name
+        console.log('need a name');
+        return
+    }
+    const signedMessageObj = { type: 'login', address: name, page: window.location.href };
+    const messageObj = { signed_message: signedMessageObj, timestamp: parseInt(new Date().getTime() / 1000, 10) };
+    keychain.requestSignBuffer(name, JSON.stringify(messageObj), 'Posting', response => {
+        if (!response.success) { return; }
+            //Successfully logged in
+            console.log(response);
+            //We added stuff here
+            axios.post("/hive/login", response).then((res) => {
+                console.log(res)
+                let data = res.data;
+                //You'd probably want to give the url back in as a json.
+                //Whatever you send back will be save in data. Here' i'm assuming the format
+                //data = {podcaster : "https://google.com"}
+                window.location.href = `${data.loadPage}`;
+            }).catch((err) => {
+                console.log(err);
+                //Deal with any error here
+            })
+        });
+    };
+</script>
 </body>
 </html>
